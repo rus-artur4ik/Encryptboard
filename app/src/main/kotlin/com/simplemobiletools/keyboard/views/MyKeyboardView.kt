@@ -23,6 +23,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.view.animation.AccelerateInterpolator
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.animation.doOnEnd
@@ -90,6 +91,10 @@ class MyKeyboardView @JvmOverloads constructor(context: Context, attrs: Attribut
          * @param text the string to be displayed.
          */
         fun onText(text: String)
+
+        fun onEncrypt()
+
+        fun onDecrypt()
     }
 
     private var mKeyboard: MyKeyboard? = null
@@ -393,6 +398,14 @@ class MyKeyboardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 vibrateIfNeeded()
                 clearClipboardContent()
                 toggleClipboardVisibility(false)
+            }
+
+
+            encrypt_button.setOnClickListener {
+                mOnKeyboardActionListener!!.onEncrypt()
+            }
+            decrypt_button.setOnClickListener {
+                mOnKeyboardActionListener!!.onDecrypt()
             }
         }
 
@@ -981,6 +994,14 @@ class MyKeyboardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
                     override fun onText(text: String) {
                         mOnKeyboardActionListener!!.onText(text)
+                    }
+
+                    override fun onEncrypt() {
+                        mOnKeyboardActionListener!!.onEncrypt()
+                    }
+
+                    override fun onDecrypt() {
+                        mOnKeyboardActionListener!!.onDecrypt()
                     }
                 }
 

@@ -68,6 +68,8 @@ dependencies {
     implementation 'com.github.SimpleMobileTools:Simple-Commons:32146a26da'
     implementation 'androidx.emoji2:emoji2-bundled:1.2.0'
 
+    implementation 'com.scottyab:aescrypt:0.0.1'
+
     kapt 'androidx.room:room-compiler:2.4.3'
     implementation 'androidx.room:room-runtime:2.4.3'
     annotationProcessor 'androidx.room:room-compiler:2.4.3'

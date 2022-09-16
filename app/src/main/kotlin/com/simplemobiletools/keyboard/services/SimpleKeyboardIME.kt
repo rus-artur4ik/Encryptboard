@@ -14,11 +14,16 @@ import android.view.inputmethod.EditorInfo.IME_ACTION_NONE
 import android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION
 import android.view.inputmethod.EditorInfo.IME_MASK_ACTION
 import android.view.inputmethod.ExtractedTextRequest
+import android.widget.Toast
+import com.scottyab.aescrypt.AESCrypt
+import com.simplemobiletools.commons.extensions.toast
 import com.simplemobiletools.keyboard.R
 import com.simplemobiletools.keyboard.extensions.config
 import com.simplemobiletools.keyboard.helpers.*
 import com.simplemobiletools.keyboard.views.MyKeyboardView
 import kotlinx.android.synthetic.main.keyboard_view_keyboard.view.*
+import java.security.GeneralSecurityException
+
 
 // based on https://www.androidauthority.com/lets-build-custom-keyboard-android-832362/
 class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionListener {
@@ -220,6 +225,7 @@ class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionL
         currentInputConnection?.commitText(text, 0)
     }
 
+
     override fun onUpdateSelection(oldSelStart: Int, oldSelEnd: Int, newSelStart: Int, newSelEnd: Int, candidatesStart: Int, candidatesEnd: Int) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
         if (newSelStart == newSelEnd) {
@@ -263,5 +269,54 @@ class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionL
             LANGUAGE_TURKISH_Q -> R.xml.keys_letters_turkish_q
             else -> R.xml.keys_letters_english_qwerty
         }
+    }
+
+    override fun onEncrypt() {
+        replaceAllText {
+            it.encrypt()
+        }
+    }
+
+    override fun onDecrypt() {
+        replaceAllText {
+            it.decrypt()
+        }
+    }
+
+    private fun replaceAllText(textFilter: (CharSequence) -> CharSequence) {
+        val inputConnection = currentInputConnection
+        inputConnection.performContextMenuAction(android.R.id.selectAll)
+        val text: CharSequence = inputConnection.getSelectedText(0)
+
+        val encryptedText = textFilter(text)
+
+        val textAfterCursorLength = inputConnection.getTextAfterCursor(text.length, 0)?.length ?: 0
+        val textBeforeCursorLength = inputConnection.getTextBeforeCursor(text.length, 0)?.length ?: 0
+
+        inputConnection.deleteSurroundingText(textBeforeCursorLength, textAfterCursorLength)
+
+        inputConnection.commitText(encryptedText, encryptedText.length)
+    }
+
+    private fun CharSequence.encrypt(): CharSequence {
+        return try {
+            AESCrypt.encrypt(PASSWORD, this.toString())
+        } catch (e: GeneralSecurityException) {
+            toast("Cannot encrypt text", Toast.LENGTH_SHORT)
+            this
+        }
+    }
+
+    private fun CharSequence.decrypt(): CharSequence {
+        return try {
+            AESCrypt.decrypt(PASSWORD, this.toString())
+        } catch (e: GeneralSecurityException) {
+            toast("Cannot decrypt text", Toast.LENGTH_SHORT)
+            this
+        }
+    }
+
+    companion object {
+        private const val PASSWORD = "password"
     }
 }
