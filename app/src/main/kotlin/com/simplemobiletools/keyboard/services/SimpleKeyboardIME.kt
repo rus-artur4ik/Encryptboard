@@ -286,7 +286,7 @@ class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionL
     private fun replaceAllText(textFilter: (CharSequence) -> CharSequence) {
         val inputConnection = currentInputConnection
         inputConnection.performContextMenuAction(android.R.id.selectAll)
-        val text: CharSequence = inputConnection.getSelectedText(0)
+        val text: CharSequence = inputConnection.getSelectedText(0) ?: ""
 
         val encryptedText = textFilter(text)
 
@@ -309,7 +309,11 @@ class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionL
 
     private fun CharSequence.decrypt(): CharSequence {
         return try {
-            AESCrypt.decrypt(PASSWORD, this.toString())
+            val decryptedText = AESCrypt.decrypt(PASSWORD, this.toString())
+            decryptedText.ifBlank {
+                toast("Cannot decrypt text", Toast.LENGTH_SHORT)
+                this
+            }
         } catch (e: GeneralSecurityException) {
             toast("Cannot decrypt text", Toast.LENGTH_SHORT)
             this
