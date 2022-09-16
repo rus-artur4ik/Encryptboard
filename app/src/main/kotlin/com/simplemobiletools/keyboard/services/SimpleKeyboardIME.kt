@@ -310,7 +310,7 @@ class SimpleKeyboardIME : InputMethodService(), MyKeyboardView.OnKeyboardActionL
     private fun CharSequence.decrypt(): CharSequence {
         return try {
             val decryptedText = AESCrypt.decrypt(PASSWORD, this.toString())
-            decryptedText.ifBlank {
+            decryptedText.ifEmpty {
                 toast("Cannot decrypt text", Toast.LENGTH_SHORT)
                 this
             }
